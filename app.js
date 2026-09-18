@@ -17,6 +17,7 @@ let sortMode = 'alpha';
 function renderLinks() {
   const controls = document.createElement('div');
   controls.className = 'sort-controls';
+  controls.classList.toggle('category-mode', sortMode === 'category');
   controls.setAttribute('role', 'radiogroup');
   controls.setAttribute('aria-label', 'Sort links');
   for (const [mode, label] of [['alpha', 'Alpha'], ['category', 'Category']]) {

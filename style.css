@@ -4,6 +4,7 @@ html, body { margin: 0; width: 100%; height: 100%; }
 body { overflow: auto; }
 #links { height: 100dvh; min-height: 200px; padding: 4px 12px; column-width: 208px; column-gap: 12px; column-fill: auto; width: 100%; }
 .sort-controls { display: flex; width: 208px; gap: 12px; margin: 0 0 5px; break-inside: avoid; }
+.sort-controls.category-mode { margin-bottom: 13px; }
 .sort-controls label { display: inline-flex; align-items: center; gap: 3px; font-size: 14px; cursor: pointer; }
 .sort-controls input { margin: 0; padding: 0; accent-color: #193d3a; }
 .category-start { width: 208px; break-inside: avoid; }
