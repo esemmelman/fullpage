@@ -11,6 +11,40 @@ const REMEMBER_MS = 90 * 24 * 60 * 60 * 1000;
 const LOGIN_KEY = 'fullpage-last-password-login';
 let signingIn = false;
 let loadedUserId = null;
+let links = [];
+let sortMode = 'alpha';
+
+function renderLinks() {
+  const controls = document.createElement('div');
+  controls.className = 'sort-controls';
+  controls.setAttribute('role', 'group');
+  controls.setAttribute('aria-label', 'Sort links');
+  for (const [mode, label] of [['alpha', 'Alpha'], ['category', 'Category']]) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = label;
+    button.setAttribute('aria-pressed', String(sortMode === mode));
+    button.addEventListener('click', () => { sortMode = mode; renderLinks(); });
+    controls.append(button);
+  }
+  const sorted = [...links].sort((a, b) => {
+    if (sortMode === 'category') {
+      const byCategory = (a.category || 'Uncategorized').localeCompare(b.category || 'Uncategorized', undefined, { sensitivity: 'base' });
+      if (byCategory) return byCategory;
+    }
+    return a.title.localeCompare(b.title, undefined, { sensitivity: 'base', numeric: true });
+  });
+  const nodes = sorted.map(item => {
+    const a = document.createElement('a');
+    a.textContent = item.title;
+    a.href = item.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    if (sortMode === 'category') a.title = item.category || 'Uncategorized';
+    return a;
+  });
+  list.replaceChildren(controls, ...nodes);
+}
 
 function rememberedLogin(userId) {
   try {
@@ -23,6 +57,7 @@ async function checkAccess() {
   const { data: { session } } = await db.auth.getSession();
   if (!session || !rememberedLogin(session.user.id)) {
     loadedUserId = null;
+    links = [];
     list.replaceChildren();
     if (session) await db.auth.signOut();
     if (!login.open) login.showModal();
@@ -37,17 +72,10 @@ async function checkAccess() {
 
 async function loadLinks() {
   status.textContent = 'Loading…';
-  const { data, error: loadError } = await db.from('link_deck_links').select('title,url').order('title');
+  const { data, error: loadError } = await db.from('link_deck_links').select('title,url,category');
   if (loadError) { status.textContent = 'Could not load links'; error.textContent = loadError.message; return; }
-  const nodes = data.map(item => {
-    const a = document.createElement('a');
-    a.textContent = item.title;
-    a.href = item.url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    return a;
-  });
-  list.replaceChildren(...nodes);
+  links = data;
+  renderLinks();
   status.textContent = '';
 }
 
