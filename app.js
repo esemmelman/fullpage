@@ -17,32 +17,53 @@ let sortMode = 'alpha';
 function renderLinks() {
   const controls = document.createElement('div');
   controls.className = 'sort-controls';
-  controls.setAttribute('role', 'group');
+  controls.setAttribute('role', 'radiogroup');
   controls.setAttribute('aria-label', 'Sort links');
   for (const [mode, label] of [['alpha', 'Alpha'], ['category', 'Category']]) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = label;
-    button.setAttribute('aria-pressed', String(sortMode === mode));
-    button.addEventListener('click', () => { sortMode = mode; renderLinks(); });
-    controls.append(button);
+    const option = document.createElement('label');
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'sort-mode';
+    radio.value = mode;
+    radio.checked = sortMode === mode;
+    radio.addEventListener('change', () => {
+      sortMode = mode;
+      renderLinks();
+      list.querySelector(`input[value="${mode}"]`).focus();
+    });
+    option.append(radio, document.createTextNode(label));
+    controls.append(option);
   }
   const sorted = [...links].sort((a, b) => {
     if (sortMode === 'category') {
-      const byCategory = (a.category || 'Uncategorized').localeCompare(b.category || 'Uncategorized', undefined, { sensitivity: 'base' });
+      const byCategory = (a.category?.trim() || 'Uncategorized').localeCompare(b.category?.trim() || 'Uncategorized', undefined, { sensitivity: 'base' });
       if (byCategory) return byCategory;
     }
     return a.title.localeCompare(b.title, undefined, { sensitivity: 'base', numeric: true });
   });
-  const nodes = sorted.map(item => {
+  const nodes = [];
+  let previousCategory = null;
+  for (const item of sorted) {
     const a = document.createElement('a');
     a.textContent = item.title;
     a.href = item.url;
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
-    if (sortMode === 'category') a.title = item.category || 'Uncategorized';
-    return a;
-  });
+    if (sortMode === 'category') {
+      const category = item.category?.trim() || 'Uncategorized';
+      if (category.toLocaleLowerCase() !== previousCategory) {
+        const start = document.createElement('div');
+        start.className = 'category-start';
+        const heading = document.createElement('h2');
+        heading.textContent = category;
+        start.append(heading, a);
+        nodes.push(start);
+        previousCategory = category.toLocaleLowerCase();
+        continue;
+      }
+    }
+    nodes.push(a);
+  }
   list.replaceChildren(controls, ...nodes);
 }
 
