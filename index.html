@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fullpage links</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="links" aria-label="Links"></main>
+  <div id="status" role="status"></div>
+  <dialog id="login">
+    <form id="login-form">
+      <h1>Sign in to your links</h1>
+      <input id="email" type="email" autocomplete="email" placeholder="Email" aria-label="Email" required>
+      <input id="password" type="password" autocomplete="current-password" placeholder="Password" aria-label="Password" required>
+      <button type="submit">Sign in</button>
+      <p id="error" role="alert"></p>
+    </form>
+  </dialog>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
